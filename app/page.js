@@ -108,7 +108,17 @@ export default function Home() {
   const [focused, setFocused] = useState(false)
   const [count, setCount] = useState(0)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const GOAL = 500
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768)
+    }
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     async function fetchCount() {
@@ -166,19 +176,10 @@ export default function Home() {
       <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
         {blobs.map((blob, i) => (
           <div key={i} style={{
-            position: "absolute",
-            borderRadius: "50%",
-            filter: "blur(80px)",
-            opacity: 0.5,
-            width: blob.width,
-            height: blob.height,
-            background: blob.background,
-            top: blob.top,
-            left: blob.left,
-            right: blob.right,
-            bottom: blob.bottom,
-            animation: `float 8s ease-in-out infinite`,
-            animationDelay: blob.delay,
+            position: "absolute", borderRadius: "50%", filter: "blur(80px)", opacity: 0.5,
+            width: blob.width, height: blob.height, background: blob.background,
+            top: blob.top, left: blob.left, right: blob.right, bottom: blob.bottom,
+            animation: "float 8s ease-in-out infinite", animationDelay: blob.delay,
           }} />
         ))}
       </div>
@@ -198,7 +199,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <section style={{ position: "relative", zIndex: 10, maxWidth: 1024, margin: "0 auto", padding: "96px 24px 64px", textAlign: "center" }}>
+      <section style={{ position: "relative", zIndex: 10, maxWidth: 1024, margin: "0 auto", padding: isMobile ? "64px 24px 48px" : "96px 24px 64px", textAlign: "center" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ ...glass, display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 999, padding: "6px 16px", marginBottom: 32 }}>
           <span style={{ fontSize: 12, color: "#6e6e73", fontWeight: 500 }}>Introducing Folio 1.0</span>
         </motion.div>
@@ -207,14 +208,14 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ fontSize: "clamp(40px, 7vw, 72px)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 24 }}
+          style={{ fontSize: isMobile ? 40 : 72, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 24 }}
         >
           Your portfolio,
           <br />
           <span style={{ color: "#6e6e73" }}>built by AI.</span>
         </motion.h1>
 
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} style={{ fontSize: 18, color: "#6e6e73", maxWidth: 480, margin: "0 auto 40px", lineHeight: 1.6 }}>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} style={{ fontSize: isMobile ? 16 : 18, color: "#6e6e73", maxWidth: 480, margin: "0 auto 40px", lineHeight: 1.6 }}>
           Stop spending weeks on your portfolio. Folio builds a stunning, personalized portfolio in under 5 minutes.
         </motion.p>
 
@@ -267,7 +268,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               onSubmit={handleSubmit}
-              style={{ display: "flex", gap: 8, maxWidth: 360, margin: "0 auto" }}
+              style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: 360, margin: "0 auto" }}
             >
               <motion.div
                 style={{ flex: 1, borderRadius: 12, overflow: "hidden", ...glassInput }}
@@ -292,7 +293,7 @@ export default function Home() {
                 style={{ padding: "12px 20px", borderRadius: 12, fontSize: 14, fontWeight: 500, color: "white", background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 {status === "loading" ? (
-                  <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                     <span style={{ width: 12, height: 12, border: "1.5px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", display: "inline-block", animation: "spin 0.8s linear infinite" }} />
                     Joining
                   </span>
@@ -308,24 +309,26 @@ export default function Home() {
           </motion.p>
         )}
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ display: "flex", justifyContent: "center", gap: 24, marginTop: 24, fontSize: 12, color: "#aeaeb2" }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: isMobile ? 12 : 24, marginTop: 24, fontSize: 12, color: "#aeaeb2" }}>
           {["No credit card", "Free during beta", "Cancel anytime"].map((text) => (
             <span key={text}>{text}</span>
           ))}
         </motion.div>
       </section>
 
-      <section style={{ position: "relative", zIndex: 10, padding: "0 24px 64px" }}>
+      <section style={{ position: "relative", zIndex: 10, padding: isMobile ? "0 16px 48px" : "0 24px 64px" }}>
         <div style={{ maxWidth: 1024, margin: "0 auto" }}>
-          <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32, textAlign: "center" }}>
+          <div style={{ ...glass, borderRadius: 24, padding: isMobile ? 24 : 32 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 24 : 32, textAlign: "center" }}>
               {[
                 { number: 5, suffix: " min", label: "Average build time" },
                 { number: 10000, suffix: "+", label: "Portfolios created" },
                 { number: 98, suffix: "%", label: "Satisfaction rate" },
               ].map((stat, i) => (
-                <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                  <p style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>
+                <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  style={isMobile ? { paddingBottom: i < 2 ? 24 : 0, borderBottom: i < 2 ? "1px solid rgba(0,0,0,0.06)" : "none" } : {}}
+                >
+                  <p style={{ fontSize: isMobile ? 32 : 40, fontWeight: 600, letterSpacing: "-0.02em" }}>
                     <AnimatedNumber value={stat.number} />{stat.suffix}
                   </p>
                   <p style={{ fontSize: 13, color: "#6e6e73", marginTop: 4 }}>{stat.label}</p>
@@ -336,21 +339,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ position: "relative", zIndex: 10, padding: "0 24px 96px" }}>
+      <section style={{ position: "relative", zIndex: 10, padding: isMobile ? "0 16px 64px" : "0 24px 96px" }}>
         <div style={{ maxWidth: 1024, margin: "0 auto" }}>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ marginBottom: 48 }}>
             <p style={{ fontSize: 11, color: "#6e6e73", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 12 }}>Features</p>
-            <h2 style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>Everything you need.</h2>
+            <h2 style={{ fontSize: isMobile ? 32 : 40, fontWeight: 600, letterSpacing: "-0.02em" }}>Everything you need.</h2>
           </motion.div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 12 }}>
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                transition={{ delay: isMobile ? 0 : i * 0.05 }}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 style={{ ...glassCard, borderRadius: 20, padding: 24, cursor: "default" }}
               >
@@ -363,15 +366,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ position: "relative", zIndex: 10, padding: "0 24px 96px" }}>
+      <section style={{ position: "relative", zIndex: 10, padding: isMobile ? "0 16px 64px" : "0 24px 96px" }}>
         <div style={{ maxWidth: 640, margin: "0 auto" }}>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ marginBottom: 48 }}>
             <p style={{ fontSize: 11, color: "#6e6e73", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500, marginBottom: 12 }}>Testimonials</p>
-            <h2 style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>Loved by creators.</h2>
+            <h2 style={{ fontSize: isMobile ? 32 : 40, fontWeight: 600, letterSpacing: "-0.02em" }}>Loved by creators.</h2>
           </motion.div>
 
-          <div style={{ ...glass, borderRadius: 24, padding: 32 }}>
-            <div style={{ position: "relative", height: 160 }}>
+          <div style={{ ...glass, borderRadius: 24, padding: isMobile ? 24 : 32 }}>
+            <div style={{ position: "relative", height: isMobile ? 180 : 160 }}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTestimonial}
@@ -381,11 +384,11 @@ export default function Home() {
                   transition={{ duration: 0.35 }}
                   style={{ position: "absolute", inset: 0 }}
                 >
-                  <p style={{ fontSize: 18, fontWeight: 500, lineHeight: 1.5, letterSpacing: "-0.01em", marginBottom: 24 }}>
+                  <p style={{ fontSize: isMobile ? 16 : 18, fontWeight: 500, lineHeight: 1.5, letterSpacing: "-0.01em", marginBottom: 24 }}>
                     "{testimonials[activeTestimonial].text}"
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #ec4899)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #ec4899)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <span style={{ color: "white", fontSize: 12, fontWeight: 600 }}>{testimonials[activeTestimonial].name.charAt(0)}</span>
                     </div>
                     <div>
@@ -402,14 +405,10 @@ export default function Home() {
                   key={i}
                   onClick={() => setActiveTestimonial(i)}
                   style={{
-                    height: 4,
-                    width: i === activeTestimonial ? 24 : 4,
-                    borderRadius: 999,
-                    border: "none",
-                    cursor: "pointer",
+                    height: 4, width: i === activeTestimonial ? 24 : 4,
+                    borderRadius: 999, border: "none", cursor: "pointer",
                     background: i === activeTestimonial ? "#7c3aed" : "rgba(0,0,0,0.15)",
-                    transition: "all 0.3s",
-                    padding: 0,
+                    transition: "all 0.3s", padding: 0,
                   }}
                 />
               ))}
@@ -418,15 +417,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ position: "relative", zIndex: 10, padding: "0 24px 128px" }}>
+      <section style={{ position: "relative", zIndex: 10, padding: isMobile ? "0 16px 96px" : "0 24px 128px" }}>
         <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center" }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ ...glass, borderRadius: 32, padding: 48 }}
+            style={{ ...glass, borderRadius: 32, padding: isMobile ? 32 : 48 }}
           >
-            <h2 style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em", marginBottom: 16 }}>Get early access.</h2>
+            <h2 style={{ fontSize: isMobile ? 28 : 40, fontWeight: 600, letterSpacing: "-0.02em", marginBottom: 16 }}>Get early access.</h2>
             <p style={{ fontSize: 14, color: "#6e6e73", marginBottom: 32 }}>
               Join {count} others on the waitlist. First 500 users get lifetime free access.
             </p>

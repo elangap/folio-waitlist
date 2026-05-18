@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { supabase } from "@/lib/supabase"
 
 const fadeUp = {
@@ -13,17 +13,70 @@ const fadeUp = {
   }),
 }
 
+const features = [
+  {
+    icon: "⚡",
+    title: "Built in 5 minutes",
+    desc: "Answer a few questions and Folio generates your entire portfolio instantly.",
+  },
+  {
+    icon: "🎨",
+    title: "Stunning designs",
+    desc: "Choose from dozens of templates crafted by world-class designers.",
+  },
+  {
+    icon: "🤖",
+    title: "AI-powered content",
+    desc: "Folio writes your bio, project descriptions, and case studies for you.",
+  },
+  {
+    icon: "🌐",
+    title: "Custom domain",
+    desc: "Publish to your own domain with one click. yourname.com in seconds.",
+  },
+  {
+    icon: "📊",
+    title: "Analytics built-in",
+    desc: "See who viewed your portfolio, where they came from, and what they clicked.",
+  },
+  {
+    icon: "🔒",
+    title: "Always up to date",
+    desc: "Connect your GitHub, Dribbble, or LinkedIn and Folio updates automatically.",
+  },
+]
+
 export default function Home() {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState("")
   const [position, setPosition] = useState(null)
   const [focused, setFocused] = useState(false)
+  const [count, setCount] = useState(null)
+
+  useEffect(() => {
+    async function fetchCount() {
+      const { count } = await supabase
+        .from("waitlist")
+        .select("*", { count: "exact", head: true })
+      setCount(count)
+    }
+    fetchCount()
+
+    const channel = supabase
+      .channel("waitlist-count")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "waitlist" }, () => {
+        fetchCount()
+      })
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
     setStatus("loading")
 
-    const { count } = await supabase
+    const { count: currentCount } = await supabase
       .from("waitlist")
       .select("*", { count: "exact", head: true })
 
@@ -38,15 +91,15 @@ export default function Home() {
         setStatus("error")
       }
     } else {
-      setPosition(count + 1)
+      setPosition(currentCount + 1)
       setStatus("success")
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white overflow-hidden relative">
+    <main className="min-h-screen bg-[#080808] text-white overflow-hidden">
 
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-violet-600/20 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-3xl" />
@@ -79,7 +132,9 @@ export default function Home() {
           className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5"
         >
           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-gray-400">Early access open</span>
+          <span className="text-xs text-gray-400">
+            {count !== null ? `${count} joined` : "Early access open"}
+          </span>
         </motion.div>
       </nav>
 
@@ -185,7 +240,6 @@ export default function Home() {
                   />
                 </motion.div>
               </div>
-
               <motion.button
                 type="submit"
                 disabled={status === "loading"}
@@ -243,30 +297,77 @@ export default function Home() {
 
       </section>
 
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={5}
-        className="relative z-10 flex justify-center pb-16 px-6"
-      >
-        <div className="w-full max-w-3xl bg-white/3 border border-white/8 rounded-3xl p-8 backdrop-blur">
-          <div className="grid grid-cols-3 gap-6 text-center">
-            {[
-              { number: "5 min", label: "Average build time" },
-              { number: "10k+", label: "Portfolios created" },
-              { number: "98%", label: "Satisfaction rate" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-                  {stat.number}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
-              </div>
+      <section className="relative z-10 px-6 pb-24">
+        <div className="max-w-5xl mx-auto">
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <p className="text-xs text-violet-400 uppercase tracking-widest font-semibold mb-4">Features</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter">
+              Everything you need,
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
+                nothing you don't.
+              </span>
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="bg-white/3 border border-white/8 rounded-2xl p-6 cursor-default"
+              >
+                <span className="text-3xl mb-4 block">{feature.icon}</span>
+                <h3 className="font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{feature.desc}</p>
+              </motion.div>
             ))}
           </div>
+
         </div>
-      </motion.div>
+      </section>
+
+      <section className="relative z-10 px-6 pb-32">
+        <div className="max-w-2xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 border border-violet-500/20 rounded-3xl p-12"
+          >
+            <p className="text-xs text-violet-400 uppercase tracking-widest font-semibold mb-4">
+              Limited spots
+            </p>
+            <h2 className="text-4xl font-black tracking-tighter mb-4">
+              Get early access.
+            </h2>
+            <p className="text-gray-400 text-sm mb-8">
+              Join {count !== null ? count : "..."} others already on the waitlist.
+              First 500 users get lifetime free access.
+            </p>
+            <motion.button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl text-sm font-bold shadow-lg shadow-violet-500/25"
+            >
+              Join the waitlist →
+            </motion.button>
+          </motion.div>
+        </div>
+      </section>
 
     </main>
   )
